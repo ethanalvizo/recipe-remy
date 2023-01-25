@@ -8,6 +8,7 @@ import { Recipe } from "../models";
 
 const Recipes = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [isAddingRecipe, setIsAddingRecipe] = useState<boolean>(false);
 
   async function fetchRecipes() {
     const result: Recipe[] = await DataStore.query(Recipe);
@@ -23,8 +24,21 @@ const Recipes = () => {
   });
 
   return (
-    <View>
-      <RecipeInput />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Recipes</Text>
+        <Button
+          onPress={() => setIsAddingRecipe(!isAddingRecipe)}
+          title={isAddingRecipe ? "Cancel" : "Add"}
+          color={isAddingRecipe ? "red" : "green"}
+        />
+      </View>
+      {isAddingRecipe && (
+        <View>
+          <RecipeInput />
+        </View>
+      )}
+
       {recipes.map((recipe: Recipe) => (
         <RecipeItem recipe={recipe} />
       ))}
@@ -36,13 +50,24 @@ export default Recipes;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    padding: "1em",
+    borderStyle: "solid",
+    borderWidth: 2,
+    borderRadius: 20
   },
-  input: { marginBottom: 10, padding: 7, backgroundColor: "#ddd" },
-  heading: { fontWeight: "normal", fontSize: 40 },
-  contactBg: { backgroundColor: "white" },
-  contactText: { margin: 0, padding: 9, fontSize: 20 },
+  header: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: "0.5em",
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  headerButton: {
+    backgroundColor: "green",
+  },
 });

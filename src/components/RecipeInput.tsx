@@ -26,7 +26,7 @@ const RecipeInput = () => {
   }
   return (
     <>
-      <Text style={styles.heading}> My Recipes </Text>
+      {/* <Text style={styles.heading}> My Recipes </Text> */}
       <TextInput
         onChangeText={(v) => onChangeText("name", v)}
         placeholder="Name"
