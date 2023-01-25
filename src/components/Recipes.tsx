@@ -1,19 +1,12 @@
-import { DataStore } from "aws-amplify";
-import { ExpoSQLiteAdapter } from "@aws-amplify/datastore-storage-adapter/ExpoSQLiteAdapter";
-import Amplify from "@aws-amplify/core";
-import config from "./src/aws-exports";
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet } from "react-native";
-import { Recipe } from "./src/models";
-import Recipes from "./src/components/Recipes";
+import { Text, View, Button, StyleSheet } from "react-native";
+import RecipeInput from "./RecipeInput";
+import RecipeItem from "./RecipeItem";
 
-Amplify.configure(config);
+import { DataStore } from "aws-amplify";
+import { Recipe } from "../models";
 
-DataStore.configure({
-  storageAdapter: ExpoSQLiteAdapter,
-});
-
-export default function App() {
+const Recipes = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
 
   async function fetchRecipes() {
@@ -30,11 +23,16 @@ export default function App() {
   });
 
   return (
-    <View style={styles.container}>
-      <Recipes />
+    <View>
+      <RecipeInput />
+      {recipes.map((recipe: Recipe) => (
+        <RecipeItem recipe={recipe} />
+      ))}
     </View>
   );
-}
+};
+
+export default Recipes;
 
 const styles = StyleSheet.create({
   container: {
