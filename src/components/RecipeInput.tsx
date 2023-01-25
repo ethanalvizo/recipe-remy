@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, TextInput, Button, StyleSheet } from "react-native";
+import { TextInput, Button, StyleSheet } from "react-native";
 
 import { DataStore } from "aws-amplify";
 import { Recipe } from "..//models";
@@ -26,7 +26,6 @@ const RecipeInput = () => {
   }
   return (
     <>
-      {/* <Text style={styles.heading}> My Recipes </Text> */}
       <TextInput
         onChangeText={(v) => onChangeText("name", v)}
         placeholder="Name"

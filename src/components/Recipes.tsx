@@ -53,7 +53,8 @@ const styles = StyleSheet.create({
     padding: "1em",
     borderStyle: "solid",
     borderWidth: 2,
-    borderRadius: 20
+    borderRadius: 20,
+    width: "100%",
   },
   header: {
     display: "flex",
