@@ -13,15 +13,22 @@ DataStore.configure({
 });
 
 export default function App() {
-  const initialState = { name: "", description: "", image: "", steps: [""] };
-
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+
+  const initialState = { name: "", description: "", image: "", steps: [""] };
   const [formState, updateFormState] = useState(initialState);
+  const [nextStep, setNextStep] = useState<string>("");
 
   async function createRecipe() {
     if (!formState.name && !formState.steps) return;
     await DataStore.save(new Recipe({ ...formState }));
     updateFormState(initialState);
+    setNextStep("");
+  }
+
+  async function deleteRecipe(id: string) {
+    const toDelete = await DataStore.query(Recipe, id);
+    if (toDelete) DataStore.delete(toDelete);
   }
 
   async function fetchRecipes() {
@@ -29,8 +36,13 @@ export default function App() {
     setRecipes(result);
   }
 
-  function onChangeText(key: string, value: string | string[]) {
-    updateFormState({ ...formState, [key]: value });
+  function onChangeText(key: string, value: string) {
+    if (key === "steps") {
+      updateFormState({ ...formState, [key]: [...formState.steps, value] });
+      setNextStep(value);
+    } else {
+      updateFormState({ ...formState, [key]: value });
+    }
   }
 
   useEffect(() => {
@@ -39,7 +51,7 @@ export default function App() {
       fetchRecipes()
     );
     return () => subscription.unsubscribe();
-  }, []);
+  });
 
   return (
     <View style={styles.container}>
@@ -59,15 +71,18 @@ export default function App() {
       <TextInput
         onChangeText={(v) => onChangeText("steps", v)}
         placeholder="Steps"
-        value={formState.steps[0]}
+        value={nextStep}
         style={styles.input}
       />
       <Button onPress={createRecipe} title="Create Recipe" />
       {recipes.map((recipe: Recipe) => (
-        <View key={recipe.id}>
+        <View key={recipe.id} onTouchStart={() => deleteRecipe(recipe.id)}>
           <View style={styles.contactBg}>
+            <Text style={styles.contactText}>ID: {recipe.id}</Text>
             <Text style={styles.contactText}>Name: {recipe.name}</Text>
-            <Text style={styles.contactText}>Description: {recipe.description}</Text>
+            <Text style={styles.contactText}>
+              Description: {recipe.description}
+            </Text>
             <Text style={styles.contactText}>Steps: {recipe.steps}</Text>
           </View>
         </View>
