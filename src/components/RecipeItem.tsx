@@ -58,5 +58,6 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
+    padding: "5px",
   },
 });
