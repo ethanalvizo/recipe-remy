@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     padding: "0.5em",
+    marginVertical: "0.25em"
   },
   preview: {
     display: "flex",

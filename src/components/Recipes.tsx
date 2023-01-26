@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, Button, StyleSheet } from "react-native";
+import { Text, View, Button, StyleSheet, ScrollView } from "react-native";
 import RecipeInput from "./RecipeInput";
 import RecipeItem from "./RecipeItem";
 
@@ -34,14 +34,15 @@ const Recipes = () => {
         />
       </View>
       {isAddingRecipe && (
-        <View>
+        <View style={styles.input}>
           <RecipeInput />
         </View>
       )}
-
-      {recipes.map((recipe: Recipe) => (
-        <RecipeItem recipe={recipe} />
-      ))}
+      <ScrollView style={styles.recipes} showsVerticalScrollIndicator={false}>
+        {recipes.map((recipe: Recipe) => (
+          <RecipeItem key={recipe.id} recipe={recipe} />
+        ))}
+      </ScrollView>
     </View>
   );
 };
@@ -55,6 +56,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 20,
     width: "100%",
+    minHeight: "40%",
+    maxHeight: "40%",
+    display: "flex",
+    flexDirection: "column",
+    // overflow: "hidden",
   },
   header: {
     display: "flex",
@@ -70,5 +76,11 @@ const styles = StyleSheet.create({
   },
   headerButton: {
     backgroundColor: "green",
+  },
+  input: {
+    marginBottom: "0.5em",
+  },
+  recipes: {
+    flex: 1,
   },
 });
