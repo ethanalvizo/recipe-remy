@@ -4,7 +4,6 @@ import { Text, View, StyleSheet, TextInput, Button } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons/faX";
 import { faEdit } from "@fortawesome/free-solid-svg-icons/faEdit";
-import { faCircle } from "@fortawesome/free-solid-svg-icons/faCircle";
 
 import { DataStore } from "aws-amplify";
 import { Recipe } from "../models";
@@ -20,7 +19,7 @@ const RecipeItem = ({ recipe }: any) => {
   const [currSteps, setCurrSteps] = useState(steps);
   const [nextStep, setNextStep] = useState("");
 
-  async function deleteRecipe(id: string) {
+  async function deleteRecipe() {
     const toDelete = await DataStore.query(Recipe, id);
     if (toDelete) DataStore.delete(toDelete);
   }
@@ -71,15 +70,22 @@ const RecipeItem = ({ recipe }: any) => {
             <Text style={styles.description}>{description}</Text>
           </View>
         )}
+        <View style={styles.editContainer}>
+          {isEditing && (
+            <View style={styles.delete} onTouchStart={() => deleteRecipe()}>
+              <FontAwesomeIcon icon={faX} color="red" />
+            </View>
+          )}
 
-        <View
-          onTouchStart={() => {
-            setIsEditing(!isEditing);
-            setShowSteps(!isEditing);
-          }}
-          style={styles.edit}
-        >
-          <FontAwesomeIcon icon={faEdit} color="grey" />
+          <View
+            onTouchStart={() => {
+              setIsEditing(!isEditing);
+              setShowSteps(!isEditing);
+            }}
+            style={styles.edit}
+          >
+            <FontAwesomeIcon icon={faEdit} color="grey" />
+          </View>
         </View>
       </View>
       <View style={styles.stepsContainer}>
@@ -145,10 +151,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "300",
   },
+  editContainer: {
+    display: "flex",
+    flexDirection: "row",
+    height: "100%",
+  },
   edit: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     padding: "5px",
+  },
+  delete: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    padding: "5px",
+    marginRight: "5px"
   },
 });
