@@ -1,42 +1,116 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, TextInput, Button } from "react-native";
 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons/faX";
+import { faEdit } from "@fortawesome/free-solid-svg-icons/faEdit";
+import { faCircle } from "@fortawesome/free-solid-svg-icons/faCircle";
 
 import { DataStore } from "aws-amplify";
 import { Recipe } from "../models";
 
-const RecipeItem = ({ recipe }) => {
+const RecipeItem = ({ recipe }: any) => {
   const { id, name, description, steps }: Recipe = recipe;
+
   const [showSteps, setShowSteps] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [currName, setCurrName] = useState(name);
+  const [currDescription, setCurrDescription] = useState(description);
+  const [currSteps, setCurrSteps] = useState(steps);
+  const [nextStep, setNextStep] = useState("");
 
   async function deleteRecipe(id: string) {
     const toDelete = await DataStore.query(Recipe, id);
     if (toDelete) DataStore.delete(toDelete);
   }
 
+  async function updateRecipe() {
+    const toUpdate = await DataStore.query(Recipe, id);
+    const newRecipe = {
+      name: currName,
+      description: currDescription,
+      steps: nextStep.length ? [...currSteps, nextStep] : [...currSteps],
+    };
+
+    if (toUpdate)
+      DataStore.save(
+        Recipe.copyOf(toUpdate, (updated) => {
+          updated.name = newRecipe.name;
+          updated.description = newRecipe.description;
+          updated.steps = newRecipe.steps;
+        })
+      );
+
+    setIsEditing(false);
+  }
+
   return (
     <>
       <View key={id} style={styles.container}>
+        {isEditing ? (
+          <View style={styles.preview}>
+            <TextInput
+              style={styles.title}
+              value={currName}
+              onChangeText={(v) => setCurrName(v)}
+            />
+
+            <TextInput
+              style={styles.description}
+              value={currDescription}
+              onChangeText={(v) => setCurrDescription(v)}
+            />
+          </View>
+        ) : (
+          <View
+            style={styles.preview}
+            onTouchStart={() => setShowSteps(!showSteps)}
+          >
+            <Text style={styles.title}>{name}</Text>
+            <Text style={styles.description}>{description}</Text>
+          </View>
+        )}
+
         <View
-          style={styles.preview}
-          onTouchStart={() => setShowSteps(!showSteps)}
+          onTouchStart={() => {
+            setIsEditing(!isEditing);
+            setShowSteps(!isEditing);
+          }}
+          style={styles.edit}
         >
-          <Text style={styles.title}>{name}</Text>
-          <Text style={styles.description}>{description}</Text>
-        </View>
-        <View onTouchStart={() => deleteRecipe(id)} style={styles.delete}>
-          <FontAwesomeIcon icon={faX} color="red" />
+          <FontAwesomeIcon icon={faEdit} color="grey" />
         </View>
       </View>
       <View style={styles.stepsContainer}>
         {showSteps &&
-          steps &&
-          steps.map((step, idx) => (
-            <Text key={idx}>{`${idx + 1}. ${step}`}</Text>
-          ))}
+          currSteps &&
+          currSteps.map((step, idx) => {
+            if (isEditing)
+              return (
+                <TextInput
+                  key={idx}
+                  value={currSteps[idx]}
+                  onChangeText={(v) => {
+                    let newSteps = [...currSteps];
+                    newSteps[idx] = v;
+                    setCurrSteps(newSteps);
+                  }}
+                />
+              );
+            else return <Text key={idx}>{`${idx + 1}. ${step}`}</Text>;
+          })}
+        {isEditing && (
+          <TextInput
+            value={nextStep}
+            onChangeText={(v) => setNextStep(v)}
+            placeholder="New step.."
+          />
+        )}
       </View>
+      {isEditing && (
+        <Button title="Save" color={"green"} onPress={updateRecipe} />
+      )}
     </>
   );
 };
@@ -55,7 +129,7 @@ const styles = StyleSheet.create({
     marginVertical: "0.25em",
   },
   stepsContainer: {
-    marginLeft: "5%"
+    marginLeft: "5%",
   },
   preview: {
     display: "flex",
@@ -71,7 +145,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "300",
   },
-  delete: {
+  edit: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
