@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TextInput, Button, StyleSheet } from "react-native";
+import { Text, TextInput, Button, StyleSheet } from "react-native";
 
 import { DataStore } from "aws-amplify";
 import { Recipe } from "..//models";
@@ -17,13 +17,20 @@ const RecipeInput = () => {
   }
 
   function onChangeText(key: string, value: string) {
-    if (key === "steps") {
-      updateFormState({ ...formState, [key]: [...formState.steps, value] });
-      setNextStep(value);
-    } else {
+    if (key !== "steps") {
       updateFormState({ ...formState, [key]: value });
+    } else {
+      setNextStep(value);
     }
   }
+
+  const handleEnterPress = ({ nativeEvent: { key: keyValue } }) => {
+    if (keyValue === "Enter") {
+      updateFormState({ ...formState, steps: [...formState.steps, nextStep] });
+      setNextStep("");
+    }
+  };
+
   return (
     <>
       <TextInput
@@ -38,11 +45,17 @@ const RecipeInput = () => {
         value={formState.description}
         style={styles.input}
       />
+      <Text>Steps:</Text>
+      {formState.steps &&
+        formState.steps.map((step, idx) => (
+          <Text key={idx}>{`${idx + 1}. ${step}`}</Text>
+        ))}
       <TextInput
         onChangeText={(v) => onChangeText("steps", v)}
-        placeholder="Steps"
+        placeholder="Press Enter to Add Another Step"
         value={nextStep}
         style={styles.input}
+        onKeyPress={handleEnterPress}
       />
       <Button onPress={createRecipe} title="Add" />
     </>
