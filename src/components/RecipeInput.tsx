@@ -5,7 +5,12 @@ import { DataStore } from "aws-amplify";
 import { Recipe } from "..//models";
 
 const RecipeInput = () => {
-  const initialState = { name: "", description: "", image: "", steps: [""] };
+  const initialState: Partial<Recipe> = {
+    name: "",
+    description: "",
+    image: "",
+    steps: [],
+  };
   const [formState, updateFormState] = useState(initialState);
   const [nextStep, setNextStep] = useState<string>("");
 
@@ -17,16 +22,25 @@ const RecipeInput = () => {
   }
 
   function onChangeText(key: string, value: string) {
-    if (key === "steps") {
-      updateFormState({ ...formState, [key]: [...formState.steps, value] });
-      setNextStep(value);
-    } else {
+    if (key !== "steps") {
       updateFormState({ ...formState, [key]: value });
+    } else {
+      setNextStep(value);
     }
   }
+
+  const handleEnterPress = ({ nativeEvent: { key: keyValue } }) => {
+    if (keyValue === "Enter" && nextStep) {
+      updateFormState({
+        ...formState,
+        steps: formState.steps ? [...formState.steps, nextStep] : [nextStep],
+      });
+      setNextStep("");
+    }
+  };
+
   return (
     <>
-      {/* <Text style={styles.heading}> My Recipes </Text> */}
       <TextInput
         onChangeText={(v) => onChangeText("name", v)}
         placeholder="Name"
@@ -39,11 +53,17 @@ const RecipeInput = () => {
         value={formState.description}
         style={styles.input}
       />
+      <Text>Steps:</Text>
+      {formState.steps &&
+        formState.steps.map((step, idx) => {
+          if (step) return <Text key={idx}>{`${idx + 1}. ${step}`}</Text>;
+        })}
       <TextInput
         onChangeText={(v) => onChangeText("steps", v)}
-        placeholder="Steps"
+        placeholder="Press Enter to Add Another Step"
         value={nextStep}
         style={styles.input}
+        onKeyPress={handleEnterPress}
       />
       <Button onPress={createRecipe} title="Add" />
     </>
